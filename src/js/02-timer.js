@@ -37,6 +37,7 @@ const formTimer = document.querySelector('.timer');
 const field = document.querySelectorAll('.field');
 const input = document.querySelector('input#datetime-picker');
 const button = document.querySelector('button');
+
 //// STYLES
 const styles = () => {
   body.style.marginLeft = '50px';
@@ -55,6 +56,7 @@ const styles = () => {
 };
 styles();
 /////// SET DATEINPUT
+button.addEventListener('click', handleSubmint);
 flatpickr('input', {
   enableTime: true,
   time_24hr: true,
@@ -62,35 +64,41 @@ flatpickr('input', {
   minuteIncrement: 1,
   onClose(selectedDates) {
     const dateInput = selectedDates[0];
-    const currentDate = new Date();
-    if (dateInput.getTime() <= currentDate.getTime()) {
+    if (dateInput.getTime() <= Date.now()) {
       button.setAttribute('disabled', 'disabled');
       Notiflix.Notify.failure('Please choose a date in the future');
     } else {
       button.removeAttribute('disabled');
-      let timerMilisec = dateInput.getTime() - currentDate.getTime();
-      const eventButton = button.addEventListener('click', handleSubmint);
-      function handleSubmint(event) {
-        console.log('Start: ');
-        setInterval(() => {
-          timerMilisec -= 1000;
-          const objDate = convertMs(timerMilisec);
-          function addLeadingZero(value) {
-            const { days, hours, minutes, seconds } = value;
-            const newValue = Object.keys(value).map(key => {
-              return String(value[key]).padStart(2, '0');
-            });
-            field[3].firstElementChild.textContent = `${newValue[3]}`;
-            field[2].firstElementChild.textContent = `${newValue[2]}`;
-            field[1].firstElementChild.textContent = `${newValue[1]}`;
-            field[0].firstElementChild.textContent = `${newValue[0]}`;
-          }
-          addLeadingZero(objDate);
-        }, 1000);
-      }
     }
   },
 });
+
+function handleSubmint(event) {
+  // console.log(12456);
+  const date = new Date(input.value).getTime();
+  setInterval(() => {
+    let timerMilisec = date - Date.now();
+    // console.log(timerMilisec);
+    const objDate = convertMs(timerMilisec);
+
+    const data = addLeadingZero(objDate);
+    update(data);
+  }, 1000);
+}
+
+function addLeadingZero(value) {
+  const { days, hours, minutes, seconds } = value;
+  return Object.keys(value).map(key => {
+    return String(value[key]).padStart(2, '0');
+  });
+}
+
+function update(newValue) {
+  field[3].firstElementChild.textContent = `${newValue[3]}`;
+  field[2].firstElementChild.textContent = `${newValue[2]}`;
+  field[1].firstElementChild.textContent = `${newValue[1]}`;
+  field[0].firstElementChild.textContent = `${newValue[0]}`;
+}
 
 /////////////
 function convertMs(ms) {
