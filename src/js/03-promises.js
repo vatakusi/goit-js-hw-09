@@ -12,8 +12,6 @@
 
 import Notiflix from 'notiflix';
 //////imports
-//         res(Notiflix.Notify.success('Sol lucet omnibus'));
-//         rej(Notiflix.Notify.failure('Please choose a date in the future'));
 
 const form = document.querySelector('.form');
 form.addEventListener('submit', handleSubmint);
@@ -23,17 +21,25 @@ function handleSubmint(e) {
   const {
     elements: { delay, step, amount },
   } = e.currentTarget;
-  const dataForm = { delay: delay.value, step: step.value, amount: amount.value };
+  const dataForm = {
+    delay: Number(delay.value),
+    step: Number(step.value),
+    amount: Number(amount.value),
+  };
   console.log(dataForm);
+  console.log('amount', dataForm.amount);
 
-  const arrAmount = n => [...Array(n).keys()];
-  arrAmount(Number(dataForm.amount)).forEach(
-    num => createPromise(num, Number(dataForm.delay)),
-    // console.log(num),
-  );
-  // createPromise(1, 1000);
+  for (let i = 1; i <= dataForm.amount; i += 1) {
+    createPromise(i, dataForm.delay)
+      .then(({ position, delay }) => {
+        Notiflix.Notify.success('Resolve promise ' + position + ' in: ' + delay + 'ms');
+      })
+      .catch(({ position, delay }) => {
+        Notiflix.Notify.failure('Reject promise ' + position + ' in: ' + delay + 'ms');
+      });
+    dataForm.delay += dataForm.step;
+  }
 
-  console.log(dataForm.amount);
   return dataForm;
 }
 
@@ -44,11 +50,10 @@ function createPromise(position, delay) {
       if (shouldResolve) {
         // Fulfill
         resolve({ position, delay });
-        console.log(resolve({ position, delay }));
       } else {
         // Reject
+        console.log(position, delay, ': err');
         reject({ position, delay });
-        console.log('ko');
       }
     }, delay);
   });
